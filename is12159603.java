@@ -280,7 +280,7 @@ public class is12159603
 				** Display best performer of
 				** generation
 				************************************/
-				graph = new GraphVisualization(adjacencyMatrix, currentPopulation[0], N);
+				graph = new GraphVisualization(adjacencyMatrix, currentPopulation[0], N, g);
 				
 				/************************************
 				** Copy best performing third into
@@ -358,6 +358,13 @@ public class is12159603
 						p--;
 					}
 				}
+				
+				/************************************
+				** Copy new population back into
+				** current population.
+				************************************/
+				for(int i = 0; i < P; i++)
+					currentPopulation[i] = nextPopulation[i].clone();
 				
 				/************************************
 				** Test: printing out population
@@ -556,14 +563,14 @@ public class is12159603
 		private int numberOfVertices;
 		private double chunk;
 		
-		public GraphVisualization(int[][] adjacencyMatrix, int[] ordering, int numberOfVertices)
+		public GraphVisualization(int[][] adjacencyMatrix, int[] ordering, int numberOfVertices, int gen)
 		{
 			this.adjacencyMatrix = adjacencyMatrix;
 			this.ordering = ordering;
 			this.numberOfVertices = numberOfVertices;
 			this.chunk = ( (Math.PI * 2) / ( (double)numberOfVertices ) );
 			
-			setTitle(TITLE);
+			setTitle(TITLE + ": G(" + gen + ")");
 			setSize(WIDTH, HEIGHT);
 			setVisible(true);
 			setDefaultCloseOperation(EXIT_ON_CLOSE);
