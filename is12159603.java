@@ -1,3 +1,9 @@
+/***************************
+** Adam Aherne		12159603
+** Alan Finnin		17239621
+** Daniel Dalton 	17219477
+** William Cummins	17234956
+***************************/
 import java.util.*;
 import java.io.*;
 import java.lang.Math;
@@ -9,13 +15,14 @@ import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.ButtonGroup;
+import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
 
 public class is12159603
 {
 	private static final String INPUT = "input.txt";
 	private static final int MAX = 100;
-	public static int c = 0;
 	private static File file;
 	private static Scanner scanner;
 	
@@ -25,6 +32,9 @@ public class is12159603
     private static JTextField jGenerations;
 	private static JTextField jCrossover;
     private static JTextField jMutation;
+    private static ButtonGroup buttonGroup;
+    private static JRadioButton defaultButton;
+    private static JRadioButton angGAButton;
 	
 	private static String sPopulation;
 	private static String sGenerations;
@@ -37,11 +47,15 @@ public class is12159603
 	private static int Cr;
 	private static int Mu;
 	
+	private static double[] betweenessCentralities;
+	
 	private static int[][] adjacencyMatrix;
 	private static int[][] currentPopulation;
 	private static int[][] nextPopulation;
 	
 	private static GraphVisualization graph;
+
+	private static boolean defaultMethod = true;
 	
 	public static void main(String args[])
 	{
@@ -53,24 +67,33 @@ public class is12159603
 		try
 		{
 			panel = new JPanel();
-			panel.setLayout(new GridLayout(0, 4, 2, 2));
+			panel.setLayout(new GridLayout(0, 2, 2, 2));
 			
 			jPopulation = new JTextField();
 			jGenerations = new JTextField();
 			jCrossover = new JTextField();
 			jMutation = new JTextField();
+			buttonGroup = new ButtonGroup();
+			defaultButton = new JRadioButton("Use default fitness function(total edge lengths)", true);
+			angGAButton = new JRadioButton("Use AngGA fitness function", false);
+
+			buttonGroup.add(defaultButton);
+			buttonGroup.add(angGAButton);
 			
 			panel.add(new JLabel("Population(P):"));
 			panel.add(jPopulation);
 			
-			panel.add(new JLabel("Generations(G)"));
+			panel.add(new JLabel("Generations(G):"));
 			panel.add(jGenerations);
 			
-			panel.add(new JLabel("Crossover Rate(Cr)"));
+			panel.add(new JLabel("Crossover Rate(Cr):"));
 			panel.add(jCrossover);
 			
-			panel.add(new JLabel("Mutation Rate(Mu)"));
+			panel.add(new JLabel("Mutation Rate(Mu):"));
 			panel.add(jMutation);
+
+			panel.add(defaultButton);
+			panel.add(angGAButton);
 			
 			int option = JOptionPane.showConfirmDialog(frame, panel, "Genetic details:",
 														JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
@@ -81,6 +104,11 @@ public class is12159603
 				sGenerations = jGenerations.getText();
 				sCrossover =  jCrossover.getText();
 				sMutation = jMutation.getText();
+
+				if(defaultButton.isSelected())
+					defaultMethod = true;
+				else if(angGAButton.isSelected())
+					defaultMethod = false;
 				
 				if(verifyInt(sPopulation))
 				{
@@ -167,8 +195,8 @@ public class is12159603
 		 ** file. This is to avoid reading
 		 ** the file twice. 
 		 ************************************/
-		//try
-		//{
+		try
+		{
 			while(scanner.hasNext())
 			{
 				String[] line = (scanner.nextLine()).split(" ");
@@ -182,6 +210,7 @@ public class is12159603
 			
 			N++;
 			adjacencyMatrix = new int[N][N];
+			betweenessCentralities = new double[N];
 			
 			/************************************
 			** Populate adjacency matrix from
@@ -205,6 +234,12 @@ public class is12159603
 					System.out.print(" " + ( adjacencyMatrix[i][j]) + " |");
 				System.out.println();
 			}
+			
+			/************************************
+			** Store betweeness centralities for
+			** each node. Used in fitness cost.
+			************************************/
+			getBetweenessCentralities();
 			
 			/************************************
 			** Declare 2-d arrays.
@@ -253,8 +288,6 @@ public class is12159603
 			}
 			System.out.println();
 			
-			//graph = new GraphVisualization(adjacencyMatrix, currentPopulation[0], N);
-			//graph = new GraphVisualization(adjacencyMatrix, currentPopulation[P - 1], N);
 			System.out.println();
 			
 			/**************************************
@@ -274,7 +307,7 @@ public class is12159603
 				sortOrderings( currentPopulation, 0, (P - 1) );
 				
 				System.out.println("Best performing ordering from G(" + g + "):");
-				System.out.println("  " + Arrays.toString(currentPopulation[0]));
+				System.out.println("  " + Arrays.toString(currentPopulation[0]) + "\n");
 				
 				/************************************
 				** Display best performer of
@@ -365,67 +398,137 @@ public class is12159603
 				************************************/
 				for(int i = 0; i < P; i++)
 					currentPopulation[i] = nextPopulation[i].clone();
-				
-				/************************************
-				** Test: printing out population
-				************************************/
-				for(int i = 0; i < P; i++)
-				{
-				System.out.print(" #" + i + "-");
-				System.out.println(" " + Arrays.toString(nextPopulation[i]));
-				}
 			}
-		//}
-		//catch(Exception e)
-		//{
-			//System.out.println(e);
-			//System.exit(0);
-		//}
+			
+			/************************************
+			** Print out final champion!!
+			************************************/
+			sortOrderings( currentPopulation, 0, P - 1 );
+			System.out.println("Best performing ordering from final generation:");
+			System.out.println("  " + Arrays.toString(currentPopulation[0]));
+			graph = new GraphVisualization(adjacencyMatrix, currentPopulation[0], N, G);				
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+			System.exit(0);
+		}
 	}
 	
-	public static boolean verifyInt(String test)
+	private static boolean verifyInt(String test)
 	{
 		String pattern = "(((\\s))*((-)?)([0-9])+((\\s))*){1}";
 		
 		return test.matches(pattern);
 	}
 	
-	/************************************
-	** Implementation of given fitness
-	** cost(total length of lines).
-	************************************/
-	public static int fitnessCost(int[] ordering)
+	/***************************************
+	** Implementation of AngGA fitness cost
+	** See git README for more info.
+	***************************************/
+	private static double fitnessCost(int[] ordering)
 	{
-		double ret = 0.0;
-		double radius = 100.0;
-		double chunk = ( (Math.PI * 2.0) / ( (double)N ) );
-		
-		/************************************
-		** Loop through upper half of
-		** adjacencyMatrix. If edge found
-		** work out distance using line
-		** functions
-		** https://orion.math.iastate.edu/dept/links/formulas/form2.pdf
-		************************************/
-		for(int i = 0; i < N; i++)
+		if(!defaultMethod)
+		{
+			double ret = 0.0;
+			double radius = 100.0;
+			double chunk = ( (Math.PI * 2.0) / ( (double)N ) );
+			int mov = 200;
+			
+			for(int i = 0; i < N; i++)
+			{
 				for(int j = i + 1; j < N; j++)
+				{
 					if( adjacencyMatrix[ ordering[i] ][ ordering[j] ] == 1 )
 					{
-						double x1 = ( Math.cos(i * chunk) * radius );
-						double y1 = ( Math.sin(i * chunk) * radius );
-						double x2 = ( Math.cos(j * chunk) * radius );
-						double y2 = ( Math.sin(j * chunk) * radius );
-						
-						ret += ( Math.sqrt( ( Math.pow( (x2 - x1), 2 ) ) + ( Math.pow( (y2 - y1), 2 ) ) ) );
+						for(int k = j + 1; k < N; k++)
+						{
+							if( adjacencyMatrix[ ordering[i] ][ ordering[k] ] == 1 )
+							{
+								/******************************
+								** Vertice cordinates
+								** on circle.
+								******************************/
+								double vi_x = ( Math.cos(i * chunk) * radius ) + mov;
+								double vi_y = ( Math.sin(i * chunk) * radius ) + mov;
+								double vj_x = ( Math.cos(j * chunk) * radius ) + mov;
+								double vj_y = ( Math.sin(j * chunk) * radius ) + mov;
+								double vk_x = ( Math.cos(k * chunk) * radius ) + mov;
+								double vk_y = ( Math.sin(k * chunk) * radius ) + mov;
+								
+								/******************************
+								** Edge slopes. With longs
+								** division by 0 gives infinty.
+								** This can result in slopes
+								** being NaN and ruin fitness
+								** function.
+								******************************/
+								double m_ij = (vj_y - vi_y) / (vj_x - vi_x); if(m_ij == Double.POSITIVE_INFINITY || m_ij == Double.NEGATIVE_INFINITY)m_ij = 0.0;
+								double m_ik = (vk_y - vi_y) / (vk_x - vi_x); if(m_ik == Double.POSITIVE_INFINITY || m_ik == Double.NEGATIVE_INFINITY)m_ik = 0.0;
+								
+								/*****************************
+								** Length of edges
+								*****************************/
+								double d_ij = ( Math.sqrt( ( Math.pow( (vj_x - vi_x), 2 ) ) + ( Math.pow( (vj_y - vi_y), 2 ) ) ) );
+								double d_ik = ( Math.sqrt( ( Math.pow( (vk_x - vi_x), 2 ) ) + ( Math.pow( (vk_y - vi_y), 2 ) ) ) );
+								
+								/*****************************
+								** Angle between edges.
+								** If <360, use inside angle.
+								** toDegrees needed as atan
+								** returns angle in radians.
+								*****************************/
+								double angle = Math.abs( Math.toDegrees( Math.atan( ( m_ij - m_ik ) / ( 1.0 + ( m_ij * m_ik ) ) ) ) );
+								if(angle > 180.0)
+									angle = 360.0 - angle;
+								
+								/*****************************
+								** Don't forget betweeness
+								** centralities. Algorithm
+								** detailed in git repository.
+								*****************************/
+								ret += ( angle * d_ij * d_ik * betweenessCentralities[i] * betweenessCentralities[j] * betweenessCentralities[k] );
+							}
+						}
 					}
-		
-		return (int)ret;
+				}
+			}
+			
+			return ret;
+		}
+		else
+		{
+			double ret = 0.0;
+			double radius = 100.0;
+			double chunk = ( (Math.PI * 2.0) / ( (double)N ) );
+			
+			/************************************
+			** Loop through upper half of
+			** adjacencyMatrix. If edge found
+			** work out distance using line
+			** functions
+			** https://orion.math.iastate.edu/dept/links/formulas/form2.pdf
+			************************************/
+			for(int i = 0; i < N; i++)
+					for(int j = i + 1; j < N; j++)
+						if( adjacencyMatrix[ ordering[i] ][ ordering[j] ] == 1 )
+						{
+							double x1 = ( Math.cos(i * chunk) * radius );
+							double y1 = ( Math.sin(i * chunk) * radius );
+							double x2 = ( Math.cos(j * chunk) * radius );
+							double y2 = ( Math.sin(j * chunk) * radius );
+							
+							ret += ( Math.sqrt( ( Math.pow( (x2 - x1), 2 ) ) + ( Math.pow( (y2 - y1), 2 ) ) ) );
+						}
+			
+			return ret;
+		}
 	}
 	
 	/************************************
 	** Custom mergesort implementation
 	************************************/
-	public static void sortOrderings(int[][] population, int low, int hi)
+	private static void sortOrderings(int[][] population, int low, int hi)
 	{
 		if (low >= hi)
 			return;
@@ -438,7 +541,7 @@ public class is12159603
 		mergeParts(population, low, mid, hi);
 	}
 	
-	public static void mergeParts(int[][]part, int low, int mid, int hi)
+	private static void mergeParts(int[][]part, int low, int mid, int hi)
 	{
 		int left = low; int right = mid + 1; int temp = 0;
 		int numElements = (hi - low) + 1;
@@ -464,7 +567,7 @@ public class is12159603
 	** Mutate population member. Pick 2
 	** random indices and swap them.
 	************************************/
-	public static void mutate(int[] gene)
+	private static void mutate(int[] gene)
 	{
 		int r = (int)(Math.random() * (gene.length));
 		int r2 = (int)(Math.random() * ( (gene.length) - 1));
@@ -480,7 +583,7 @@ public class is12159603
 	/************************************
 	** Crossover two population members.
 	************************************/
-	public static void crossover(int[] gene1, int[] gene2)
+	private static void crossover(int[] gene1, int[] gene2)
 	{
 		/************************************
 		** Pick random crossover point
@@ -547,6 +650,274 @@ public class is12159603
 		}
 	}
 	
+	/*****************************************
+	** Calculate betweeness centralities for
+	** each node. Needed for fitness cost.
+	** Due to limitations using an adjacency
+	** matrix, we must use DFS instead of BFS. |-> This might not be true. This may be a very naive approach. Review later.
+	** Populates static matrix declared above.
+	*****************************************/
+	private static void getBetweenessCentralities()
+	{
+		/************************************
+		** Combined open and closed lists.
+		** 0->NOT on list, 1->IS on list.
+		************************************/
+		int closed_and_open_list[] = new int[N];
+
+		/************************************
+		** Paths to be analysed later
+		** in populatePaths method.
+		************************************/
+		ArrayList< ArrayList<Integer> > paths = new ArrayList< ArrayList<Integer> >();
+
+		/************************************
+		** Analyse paths from every node to
+		** every other node, i.e. from i->j
+		************************************/
+		for(int i = 0; i < N; i++)
+		{
+			for(int j = i + 1; j < N; j++)
+			{
+				/************************************
+				** if i & j are connected directly,
+				** no need to analyse. Shortest path
+				** does not pass through any nodes.
+				************************************/
+				if(adjacencyMatrix[i][j] == 1)
+					continue;
+
+				/************************************
+				** Branch from node i and add all
+				** starting paths to paths ArrayList
+				************************************/
+				for(int k = 0; k < N; k++)
+				{
+					if(adjacencyMatrix[i][k] == 1)
+					{
+						ArrayList<Integer> temp = new  ArrayList<Integer>();
+						temp.add(i); temp.add(k);
+						paths.add(temp);
+						closed_and_open_list[k] = 1;
+					}
+				}
+
+				/************************************
+				** Add first node on path
+				** to closed list.
+				************************************/
+				closed_and_open_list[i] = 1;
+
+				/************************************
+				** Call helper method.
+				** Method defined next. See below.
+				************************************/
+				populatePaths(j, closed_and_open_list, paths);
+
+				/************************************
+				** Clear paths to analyse next
+				** pair of nodes.
+				************************************/
+				paths.clear();
+
+				/************************************
+				** Reset open/closed list,
+				** ready for next loop.
+				************************************/
+				Arrays.fill(closed_and_open_list, 0);
+			}
+		}
+	}
+
+	/************************************
+	** Supress depreacation warnings for
+	** Integer(int) constructor.
+	************************************/
+	@SuppressWarnings("deprecation")
+	private static void populatePaths(int goal, int[] closed_and_open_list, ArrayList< ArrayList<Integer> > paths)
+	{
+		/************************************
+		** This array tracks how many times
+		** each node was passed through by
+		** the shortest paths between the
+		** target nodes. Possible it may be
+		** passed through zero times.
+		************************************/
+		int times_passed_through[] = new int[N];
+
+		/************************************
+		** Track if we have reached target
+		** node. Used for loop condition.
+		************************************/
+		boolean goal_reached = false;
+
+		/************************************
+		** Loop until target node reached or
+		** open/closedlist empty. If list is
+		** empty, graph is not connected.
+		** Answer should still be correct.   |-> Double check this.
+		************************************/
+		while( ( contains(closed_and_open_list, 0) ) && ( !goal_reached ) )
+		{
+			/************************************
+			** Keep track of starting number of
+			** paths. Branching will cause paths
+			** to be added, we don't want to
+			** deal with them til next iteration.
+			************************************/
+			int size = paths.size();
+
+			break_here:
+			for(int i = 0; i < size; i++)
+			{
+				/************************************
+				** Keep track of starting length of
+				** path. Similar reason as above.
+				************************************/
+				int path_length = paths.get(i).size();
+
+				/************************************
+				** If we have reached target node,
+				** break from loop.
+				************************************/
+				if(adjacencyMatrix[goal][paths.get(i).get(paths.get(i).size() - 1)] == 1)
+				{
+					paths.get(i).add(goal);
+					goal_reached = true;
+					continue break_here;
+				}
+
+				/************************************
+				** Boolean needed to check for
+				** a branch in the path.
+				************************************/
+				boolean branch = false;
+				for(int j = 0; j < N; j++)
+				{
+
+					/************************************
+					** If node j is connected to current
+					** end node, and node on closed list,
+					** add to path. 
+					************************************/
+					if(adjacencyMatrix[j][paths.get(i).get(path_length - 1)] == 1
+						&& closed_and_open_list[j] == 0)
+					{
+						/************************************
+						** If another node as already been
+						** added, we need to branch. Copy
+						** path, add to list of paths, then
+						** add the node.
+						************************************/
+						if(branch)
+						{
+							ArrayList<Integer> temp = new ArrayList<Integer>();
+
+							/************************************
+							** Using length of path from start
+							** of loop. We don't want to add the
+							** first node added to new branches.
+							************************************/
+							for(int k = 0; k < path_length; k++)
+							{
+								temp.add(new Integer(paths.get(i).get(k)));
+							}
+
+							temp.add(j);
+
+							paths.add(temp);
+						}
+						else
+						{
+							paths.get(i).add(j);
+							branch = true;
+						}
+					}
+				}
+			}
+
+			/************************************
+			** Add newly added nodes to closed
+			** list. These nodes will be at the
+			** last index of the paths.
+			************************************/
+			for(int i = 0; i < paths.size(); i++)
+			{
+				closed_and_open_list[ paths.get(i).get(paths.get(i).size() - 1) ] = 1;
+
+				if( paths.get(i).get(paths.get(i).size() - 1) == goal)
+					goal_reached = true;
+			}
+		}
+		
+		/************************************
+		** Remove all paths that did NOT
+		** reach the target node. If reached,
+		** last index will be the target.
+		************************************/
+		int count = 0;
+		while(count < paths.size())
+		{
+			if( paths.get(count).get(paths.get(count).size() - 1) == goal)
+				count++;
+			else
+				paths.remove(count);
+		}
+		
+		/************************************
+		** Iterate through paths to find
+		** length of the shortest
+		************************************/
+		int min = N;
+		for(int i = 0; i < paths.size(); i++)
+			if(paths.get(i).size() < min)
+				min = paths.get(i).size();
+		
+		/************************************
+		** Discard any paths that were not
+		** the shortest. May be multiple
+		** shortest paths.
+		************************************/
+		count = 0;
+		while(count < paths.size())
+		{
+			if( paths.get(count).size() > min)
+				paths.remove(count);
+			else
+				count++;
+		}
+		
+		/*************************************
+		** Check each shortest path. Increment
+		** node's index in the array for each
+		** path it appears in.
+		*************************************/
+		for(int i = 0; i < paths.size(); i++)
+			for(int j = 1; j < paths.get(i).size() - 1; j++)
+				times_passed_through[ paths.get(i).get(j) ]++;
+
+		/**************************************************
+		** Increment a node's betweeness centrality by the
+		** fraction of shortest paths that pass through it.
+		** This will be a value from 0-1 inclusive.
+		**************************************************/
+		for(int i = 0; i < times_passed_through.length; i++)
+			betweenessCentralities[i] += (double)( (double)times_passed_through[i] ) / ( (double)paths.size() );
+	}
+	
+	/*************************************
+	** Handy method to check if an array
+	** contains a given value.
+	*************************************/
+	private static boolean contains(int[] arr, int check)
+	{
+		for(int i : arr)
+			if(i == check)
+				return true;
+
+		return false;	
+	}
+
 	/************************************
 	** Line drawing method given in
 	** specification.
