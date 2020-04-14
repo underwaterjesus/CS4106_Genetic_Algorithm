@@ -6,8 +6,8 @@ Placing all nodes of a graph on the perimeter of a circle, order the nodes to ha
 **For more a more in-depth description see [CS4106_Project_20.pdf](https://github.com/underwaterjesus/CS4106_Genetic_Algorithm/blob/master/CS4106_Project_20.pdf
 "CS4106 Project Specification") in the main git repository.**<br/>
 Given an input file, input.txt, representing an edge list, we first create an adjacency matrix.
-The user is then asked to input the populationsize(P), number of generations(G), crossover rate(Cr), and mutation rate(Mu).
-This must all be validated and checked against constraints in the project specification.<br/>
+The user is then asked to input the population size(P), number of generations(G), crossover rate(Cr), and mutation rate(Mu).
+These must all be validated and checked against constraints in the project specification.<br/>
 The user must also select between two fitness functions to use.<br/>
 The program cycles through the genetic process for the given number of generations,
 outputting the best performer to the console each generation. The graph will also be visually presented to the user in a JFrame window.<br/>
@@ -27,4 +27,4 @@ angles formed by all connected edges, the length of these edges, and the between
 ## Graph Visualization
 All graphs are visualized using an algorithm given in the project specification.
 ## Results
-Current testing has produced a best result of one(1) edge crossing by the specified fitness function, and a best result of 14 edge crossings by the AngGA algorithm.
+Current testing has produced a best result of one(1) edge crossing by the fitness function specified in the project, and a best result of fourteen(14) edge crossings by the AngGA algorithm.
