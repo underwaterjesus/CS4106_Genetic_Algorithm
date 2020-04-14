@@ -1,9 +1,6 @@
 # CS4106 Genetic Algorithm
+### [Adam Aherne](https://github.com/underwaterjesus "Adam's GitHub") [Alan Finnin](https://github.com/alanfinnin "Alan's GitHub") [Daniel Dalton](https://github.com/ddalton98 "Daniel's GitHub") [Williamm Cummins](https://github.com/Willc200 "William's GitHub")
 CS4106 Genetic Algorithm project. Use a genetic algorithm to minimize graph edge crossings.<br/>
-[Adam Aherne](https://github.com/underwaterjesus "Adam's GitHub")
-[Alan Finnin](https://github.com/alanfinnin "Alan's GitHub")
-[Daniel Dalton](https://github.com/ddalton98 "Daniel's GitHub")
-[Williamm Cummins](https://github.com/Willc200 "William's GitHub")
 ## Project Aim
 Placing all nodes of a graph on the perimeter of a circle, order the nodes to have the lowest number of edge crossings.
 ## Description
