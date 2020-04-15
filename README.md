@@ -29,4 +29,4 @@ angles formed by all connected edges, the length of these edges, and the between
 ## Graph Visualization
 All graphs are visualized using an algorithm given in the project specification.
 ## Results
-Current testing has produced a best result of one(1) edge crossing by the fitness function specified in the project, and a best result of five(5) edge crossings by the AngGA algorithm.
+Current testing has produced a best result of one(1) edge crossing by the fitness function specified in the project, and a best result of one(1) edge crossing by the AngGA algorithm.
