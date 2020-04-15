@@ -474,7 +474,7 @@ public class is12159603
 								
 								/*****************************
 								** Angle between edges.
-								** If <360, use inside angle.
+								** If >180, use inside angle.
 								** toDegrees needed as atan
 								** returns angle in radians.
 								*****************************/
