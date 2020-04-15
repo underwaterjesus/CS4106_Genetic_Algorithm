@@ -437,7 +437,7 @@ public class is12159603
 			
 			for(int i = 0; i < N; i++)
 			{
-				for(int j = i + 1; j < N; j++)
+				for(int j = 0; j < N; j++)
 				{
 					if( adjacencyMatrix[ ordering[i] ][ ordering[j] ] == 1 )
 					{
