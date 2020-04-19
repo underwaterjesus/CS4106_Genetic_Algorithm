@@ -503,10 +503,9 @@ public class is12159603
 			double chunk = ( (Math.PI * 2.0) / ( (double)N ) );
 			
 			/************************************
-			** Loop through upper half of
-			** adjacencyMatrix. If edge found
-			** work out distance using line
-			** functions
+			** Loop through the individual and if
+			** an edge is found, work out the
+			** distance using formula
 			** https://orion.math.iastate.edu/dept/links/formulas/form2.pdf
 			************************************/
 			for(int i = 0; i < N; i++)
