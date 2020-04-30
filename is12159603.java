@@ -239,7 +239,8 @@ public class is12159603
 			** Store betweeness centralities for
 			** each node. Used in fitness cost.
 			************************************/
-			getBetweenessCentralities();
+			if(!defaultMethod)
+				getBetweenessCentralities();
 			
 			/************************************
 			** Declare 2-d arrays.
@@ -406,6 +407,7 @@ public class is12159603
 			sortOrderings( currentPopulation, 0, P - 1 );
 			System.out.println("Best performing ordering from final generation:");
 			System.out.println("  " + Arrays.toString(currentPopulation[0]));
+			System.out.printf("\n**Fitness function used was %s**\n", defaultMethod == true ? "the default method" : "AngGA");
 			graph = new GraphVisualization(adjacencyMatrix, currentPopulation[0], N, G);				
 		}
 		catch(Exception e)
