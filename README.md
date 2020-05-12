@@ -13,7 +13,7 @@ These must all be validated and checked against constraints in the project speci
 The user must also select between two fitness functions to use.<br/>
 The program cycles through the genetic process for the given number of generations,
 outputting the best performer to the console each generation. The graph will also be visually presented to the user in a JFrame window.<br/>
-A member of the population is an array containing the order that the nodes are to be placed on the circle.
+A member of the population is an array representing the order that the nodes are to be placed on the circle.
 ## Fitness Functions
 The user will be able to pick from two different fitness functions. One is given in
 the project sepcification, the other has been chosen from relevant academic literature.<br/><br/>
@@ -23,7 +23,7 @@ Writing this algorithm was part of the project.<br/><br/>
 The second fitness function we have chosen to use is an implementation of the **AngGA** algorithm.
 More details can be found [here](https://ulir.ul.ie/bitstream/handle/10344/5395/Eaton_2016_GA.pdf?sequence=1
 "A GA-Inspired Approach to the Reduction of EdgeCrossings in Force-Directed Layouts").
-This paper is by Farshad Toosi(farshad.toosi@cit.ie), Nikola Nikolov(nikola.nikolov@ul.ie) and Malachy Eaton(malachy.eaton@ul.ie).<br/>
+This paper is by Farshad Toosi(farshad.toosi@cit.ie), Nikola Nikolov(nikola.nikolov@ul.ie) and Malachy Eaton(malachy.eaton@ul.ie). All contact details correct as of 12th May 2020.<br/>
 The lower the total of this function, the higher the fitness of the individual. To implement this algorithm it was necessary to calculate the
 angles formed by all connected edges, the length of these edges, and the betweeness centrality of each node.
 ## Graph Visualization
